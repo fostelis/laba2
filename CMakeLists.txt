@@ -18,4 +18,14 @@ add_executable(laba2 main.cpp
         exceptions.h
         mutable_list_sequence.h
         sequence_crtp.h
-        tests.cpp)
+        tests.cpp
+        segment.h
+        piecewise_function.h
+        mutable_piecewise_function.h
+        immutable_piecewise_function.h
+        piecewise_enumerator.h
+        piecewise_operators.h
+        piecewise_algorithms.h
+        tests_piecewise.cpp
+        io_utils.h
+)
