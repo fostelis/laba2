@@ -26,21 +26,31 @@ public:
         }
     }
     array_sequence(const array_sequence& other) : items_(new dynamic_array<T>(*other.items_)) {}
-    virtual ~array_sequence() { delete items_; }
+    virtual ~array_sequence() {
+        delete items_;
+    }
 
     T get_first() const override {
-        if (items_->get_size() == 0) throw empty_collection_exception("empty");
+        if (items_->get_size() == 0) {
+            throw empty_collection_exception("empty");
+        }
         return items_->get(0);
     }
     T get_last() const override {
-        if (items_->get_size() == 0) throw empty_collection_exception("empty");
+        if (items_->get_size() == 0) {
+            throw empty_collection_exception("empty");
+        }
         return items_->get(items_->get_size() - 1);
     }
-    T get(int index) const override { return items_->get(index); }
+    T get(int index) const override {
+        return items_->get(index);
+    }
 
     array_sequence<T>* get_subsequence(int start, int end) const override;
 
-    int get_length() const override { return items_->get_size(); }
+    int get_length() const override {
+        return items_->get_size();
+    }
 
     virtual array_sequence<T>* append_impl(const T& item) = 0;
     virtual array_sequence<T>* prepend_impl(const T& item) = 0;
@@ -51,8 +61,9 @@ public:
         int new_size = result->items_->get_size() + other.get_length();
         result->items_->resize(new_size);
         int pos = result->items_->get_size() - other.get_length();
-        for (int i = 0; i < other.get_length(); ++i)
+        for (int i = 0; i < other.get_length(); ++i) {
             result->items_->set(pos + i, other.get(i));
+        }
         return result;
     }
 };
@@ -66,26 +77,40 @@ public:
     explicit mutable_array_sequence(const linked_list<T>& list) : array_sequence<T>(list) {}
     mutable_array_sequence(const array_sequence<T>& other) : array_sequence<T>(other) {}
 
-    array_sequence<T>* append(const T& item) override { return append_impl(item); }
-    array_sequence<T>* prepend(const T& item) override { return prepend_impl(item); }
-    array_sequence<T>* insert_at(const T& item, int index) override { return insert_at_impl(item, index); }
-    array_sequence<T>* clone() const override { return new mutable_array_sequence<T>(*this); }
+    array_sequence<T>* append(const T& item) override {
+        return append_impl(item);
+    }
+    array_sequence<T>* prepend(const T& item) override {
+        return prepend_impl(item);
+    }
+    array_sequence<T>* insert_at(const T& item, int index) override {
+        return insert_at_impl(item, index);
+    }
+    array_sequence<T>* clone() const override {
+        return new mutable_array_sequence<T>(*this);
+    }
 
 protected:
-    array_sequence<T>* instance() override { return this; }
+    array_sequence<T>* instance() override {
+        return this;
+    }
     array_sequence<T>* append_impl(const T& item) override {
         this->items_->resize(this->items_->get_size() + 1);
         this->items_->set(this->items_->get_size() - 1, item);
         return this;
     }
-    array_sequence<T>* prepend_impl(const T& item) override { return insert_at_impl(item, 0); }
+    array_sequence<T>* prepend_impl(const T& item) override {
+        return insert_at_impl(item, 0);
+    }
     array_sequence<T>* insert_at_impl(const T& item, int index) override {
-        if (index < 0 || index > this->items_->get_size())
+        if (index < 0 || index > this->items_->get_size()) {
             throw index_out_of_range_exception("index out of range");
+        }
         int old = this->items_->get_size();
         this->items_->resize(old + 1);
-        for (int i = old; i > index; --i)
+        for (int i = old; i > index; --i) {
             this->items_->set(i, this->items_->get(i - 1));
+        }
         this->items_->set(index, item);
         return this;
     }
@@ -100,28 +125,42 @@ public:
     explicit immutable_array_sequence(const linked_list<T>& list) : array_sequence<T>(list) {}
     immutable_array_sequence(const array_sequence<T>& other) : array_sequence<T>(other) {}
 
-    array_sequence<T>* append(const T& item) override { return append_impl(item); }
-    array_sequence<T>* prepend(const T& item) override { return prepend_impl(item); }
-    array_sequence<T>* insert_at(const T& item, int index) override { return insert_at_impl(item, index); }
-    array_sequence<T>* clone() const override { return new immutable_array_sequence<T>(*this); }
+    array_sequence<T>* append(const T& item) override {
+        return append_impl(item);
+    }
+    array_sequence<T>* prepend(const T& item) override {
+        return prepend_impl(item);
+    }
+    array_sequence<T>* insert_at(const T& item, int index) override {
+        return insert_at_impl(item, index);
+    }
+    array_sequence<T>* clone() const override {
+        return new immutable_array_sequence<T>(*this);
+    }
 
 protected:
-    array_sequence<T>* instance() override { return new immutable_array_sequence<T>(*this); }
+    array_sequence<T>* instance() override {
+        return new immutable_array_sequence<T>(*this);
+    }
     array_sequence<T>* append_impl(const T& item) override {
         auto* copy = new immutable_array_sequence<T>(*this);
         copy->items_->resize(copy->items_->get_size() + 1);
         copy->items_->set(copy->items_->get_size() - 1, item);
         return copy;
     }
-    array_sequence<T>* prepend_impl(const T& item) override { return insert_at_impl(item, 0); }
+    array_sequence<T>* prepend_impl(const T& item) override {
+        return insert_at_impl(item, 0);
+    }
     array_sequence<T>* insert_at_impl(const T& item, int index) override {
-        if (index < 0 || index > this->items_->get_size())
+        if (index < 0 || index > this->items_->get_size()) {
             throw index_out_of_range_exception("index out of range");
+        }
         auto* copy = new immutable_array_sequence<T>(*this);
         int old = copy->items_->get_size();
         copy->items_->resize(old + 1);
-        for (int i = old; i > index; --i)
+        for (int i = old; i > index; --i) {
             copy->items_->set(i, copy->items_->get(i - 1));
+        }
         copy->items_->set(index, item);
         return copy;
     }
@@ -129,10 +168,13 @@ protected:
 
 template<class T>
 array_sequence<T>* array_sequence<T>::get_subsequence(int start, int end) const {
-    if (start < 0 || end >= this->items_->get_size() || start > end)
+    if (start < 0 || end >= this->items_->get_size() || start > end) {
         throw index_out_of_range_exception("invalid indices");
+    }
     T* sub = new T[end - start + 1];
-    for (int i = start; i <= end; ++i) sub[i - start] = this->items_->get(i);
+    for (int i = start; i <= end; ++i) {
+        sub[i - start] = this->items_->get(i);
+    }
     array_sequence<T>* result = new mutable_array_sequence<T>(sub, end - start + 1);
     delete[] sub;
     return result;
@@ -146,40 +188,58 @@ public:
     mutable_array_sequence_crtp() : items_(new dynamic_array<T>()) {}
     mutable_array_sequence_crtp(const T* items, int count) : items_(new dynamic_array<T>(items, count)) {}
     mutable_array_sequence_crtp(const mutable_array_sequence_crtp& other) : items_(new dynamic_array<T>(*other.items_)) {}
-    ~mutable_array_sequence_crtp() { delete items_; }
+    ~mutable_array_sequence_crtp() {
+        delete items_;
+    }
 
     T get_first() const override {
-        if (items_->get_size() == 0) throw empty_collection_exception("empty");
+        if (items_->get_size() == 0) {
+            throw empty_collection_exception("empty");
+        }
         return items_->get(0);
     }
     T get_last() const override {
-        if (items_->get_size() == 0) throw empty_collection_exception("empty");
+        if (items_->get_size() == 0) {
+            throw empty_collection_exception("empty");
+        }
         return items_->get(items_->get_size() - 1);
     }
-    T get(int index) const override { return items_->get(index); }
+    T get(int index) const override {
+        return items_->get(index);
+    }
     mutable_array_sequence_crtp* get_subsequence(int s, int e) const override {
-        if (s < 0 || e >= items_->get_size() || s > e)
+        if (s < 0 || e >= items_->get_size() || s > e) {
             throw index_out_of_range_exception("invalid indices");
+        }
         T* sub = new T[e - s + 1];
-        for (int i = s; i <= e; ++i) sub[i - s] = items_->get(i);
+        for (int i = s; i <= e; ++i) {
+            sub[i - s] = items_->get(i);
+        }
         auto* res = new mutable_array_sequence_crtp(sub, e - s + 1);
         delete[] sub;
         return res;
     }
-    int get_length() const override { return items_->get_size(); }
+    int get_length() const override {
+        return items_->get_size();
+    }
 
     sequence<T>* append_impl(const T& item) override {
         items_->resize(items_->get_size() + 1);
         items_->set(items_->get_size() - 1, item);
         return this;
     }
-    sequence<T>* prepend_impl(const T& item) override { return insert_at_impl(item, 0); }
+    sequence<T>* prepend_impl(const T& item) override {
+        return insert_at_impl(item, 0);
+    }
     sequence<T>* insert_at_impl(const T& item, int idx) override {
-        if (idx < 0 || idx > items_->get_size())
+        if (idx < 0 || idx > items_->get_size()) {
             throw index_out_of_range_exception("index out of range");
+        }
         int old = items_->get_size();
         items_->resize(old + 1);
-        for (int i = old; i > idx; --i) items_->set(i, items_->get(i - 1));
+        for (int i = old; i > idx; --i) {
+            items_->set(i, items_->get(i - 1));
+        }
         items_->set(idx, item);
         return this;
     }
@@ -187,11 +247,14 @@ public:
         int new_sz = items_->get_size() + other.get_length();
         items_->resize(new_sz);
         int pos = items_->get_size() - other.get_length();
-        for (int i = 0; i < other.get_length(); ++i)
+        for (int i = 0; i < other.get_length(); ++i) {
             items_->set(pos + i, other.get(i));
+        }
         return this;
     }
-    sequence<T>* clone() const override { return new mutable_array_sequence_crtp(*this); }
+    sequence<T>* clone() const override {
+        return new mutable_array_sequence_crtp(*this);
+    }
 };
 
 template<class T>
@@ -202,27 +265,40 @@ public:
     immutable_array_sequence_crtp() : items_(new dynamic_array<T>()) {}
     immutable_array_sequence_crtp(const T* items, int count) : items_(new dynamic_array<T>(items, count)) {}
     immutable_array_sequence_crtp(const immutable_array_sequence_crtp& other) : items_(new dynamic_array<T>(*other.items_)) {}
-    ~immutable_array_sequence_crtp() { delete items_; }
+    ~immutable_array_sequence_crtp() {
+        delete items_;
+    }
 
     T get_first() const override {
-        if (items_->get_size() == 0) throw empty_collection_exception("empty");
+        if (items_->get_size() == 0) {
+            throw empty_collection_exception("empty");
+        }
         return items_->get(0);
     }
     T get_last() const override {
-        if (items_->get_size() == 0) throw empty_collection_exception("empty");
+        if (items_->get_size() == 0) {
+            throw empty_collection_exception("empty");
+        }
         return items_->get(items_->get_size() - 1);
     }
-    T get(int index) const override { return items_->get(index); }
+    T get(int index) const override {
+        return items_->get(index);
+    }
     immutable_array_sequence_crtp* get_subsequence(int s, int e) const override {
-        if (s < 0 || e >= items_->get_size() || s > e)
+        if (s < 0 || e >= items_->get_size() || s > e) {
             throw index_out_of_range_exception("invalid indices");
+        }
         T* sub = new T[e - s + 1];
-        for (int i = s; i <= e; ++i) sub[i - s] = items_->get(i);
+        for (int i = s; i <= e; ++i) {
+            sub[i - s] = items_->get(i);
+        }
         auto* res = new immutable_array_sequence_crtp(sub, e - s + 1);
         delete[] sub;
         return res;
     }
-    int get_length() const override { return items_->get_size(); }
+    int get_length() const override {
+        return items_->get_size();
+    }
 
     sequence<T>* append_impl(const T& item) override {
         auto* copy = new immutable_array_sequence_crtp(*this);
@@ -230,14 +306,19 @@ public:
         copy->items_->set(copy->items_->get_size() - 1, item);
         return copy;
     }
-    sequence<T>* prepend_impl(const T& item) override { return insert_at_impl(item, 0); }
+    sequence<T>* prepend_impl(const T& item) override {
+        return insert_at_impl(item, 0);
+    }
     sequence<T>* insert_at_impl(const T& item, int idx) override {
-        if (idx < 0 || idx > items_->get_size())
+        if (idx < 0 || idx > items_->get_size()) {
             throw index_out_of_range_exception("index out of range");
+        }
         auto* copy = new immutable_array_sequence_crtp(*this);
         int old = copy->items_->get_size();
         copy->items_->resize(old + 1);
-        for (int i = old; i > idx; --i) copy->items_->set(i, copy->items_->get(i - 1));
+        for (int i = old; i > idx; --i) {
+            copy->items_->set(i, copy->items_->get(i - 1));
+        }
         copy->items_->set(idx, item);
         return copy;
     }
@@ -246,11 +327,14 @@ public:
         int new_sz = result->items_->get_size() + other.get_length();
         result->items_->resize(new_sz);
         int pos = result->items_->get_size() - other.get_length();
-        for (int i = 0; i < other.get_length(); ++i)
+        for (int i = 0; i < other.get_length(); ++i) {
             result->items_->set(pos + i, other.get(i));
+        }
         return result;
     }
-    sequence<T>* clone() const override { return new immutable_array_sequence_crtp(*this); }
+    sequence<T>* clone() const override {
+        return new immutable_array_sequence_crtp(*this);
+    }
 };
 
 #endif

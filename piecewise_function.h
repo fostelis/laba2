@@ -4,8 +4,10 @@
 #include "sequence.h"
 #include "segment.h"
 #include "array_sequence.h"
+#include "interval.h"
 #include <cmath>
 
+//абстрактный базовый класс
 class piecewise_function {
 protected:
     sequence<segment>* segments_;
@@ -22,48 +24,139 @@ public:
     double evaluate(double x) const {
         for (int i = 0; i < segments_->get_length(); ++i) {
             segment seg = segments_->get(i);
-            if (x >= seg.start_x && x <= seg.end_x) return seg.evaluate(x);
+            bool is_last = (i == segments_->get_length() - 1);
+            if (x >= seg.start_x && (x < seg.end_x || (is_last && x <= seg.end_x))) {
+                return seg.evaluate(x);
+            }
         }
         throw index_out_of_range_exception("x out of function domain");
     }
 
-    bool is_continuous(double epsilon = 1e-9) const {
-        if (segments_->get_length() <= 1) return true;
+    bool is_continuous_on(const interval& ivl, double epsilon = 1e-9) const {
+        if (segments_->get_length() <= 1) {
+            return true;
+        }
+        int first = -1;
+        int last = -1;
+        for (int i = 0; i < segments_->get_length(); ++i) {
+            segment seg = segments_->get(i);
+            if (seg.start_x < ivl.right && seg.end_x > ivl.left) {
+                if (first == -1) {
+                    first = i;
+                }
+                last = i;
+            }
+        }
+        if (first == -1 || first == last) {
+            return true;
+        }
+
+        for (int i = first; i < last; ++i) {
+            segment curr = segments_->get(i);
+            segment next = segments_->get(i + 1);
+            double stitch = curr.end_x;
+
+            if (stitch <= ivl.left || stitch >= ivl.right) {
+                continue;
+            }
+
+            if (std::abs(curr.evaluate(stitch) - next.evaluate(stitch)) > epsilon) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    bool is_monotonic_on(const interval& ivl) const {
+        if (segments_->get_length() <= 1) {
+            return true;
+        }
+
+        bool inc = true; // неубывающая
+        bool dec = true; // невозрастающая
+
+        for (int i = 0; i < segments_->get_length(); ++i) {
+            segment seg = segments_->get(i);
+
+            double left = std::max(seg.start_x, ivl.left);
+            double right = std::min(seg.end_x, ivl.right);
+
+            if (left >= right) {
+                continue;
+            }
+
+            if (seg.k < 0) {
+                inc = false;
+            }
+            if (seg.k > 0) {
+                dec = false;
+            }
+        }
+
         for (int i = 0; i < segments_->get_length() - 1; ++i) {
             segment curr = segments_->get(i);
             segment next = segments_->get(i + 1);
-            if (std::abs(curr.evaluate(curr.end_x) - next.evaluate(next.start_x)) > epsilon) return false;
+            double stitch = curr.end_x;
+
+            if (stitch <= ivl.left || stitch >= ivl.right) {
+                continue;
+            }
+
+            double left_val = curr.evaluate(stitch);
+            double right_val = next.evaluate(stitch);
+
+            if (left_val > right_val) {
+                inc = false;
+            }
+            if (left_val < right_val) {
+                dec = false;
+            }
         }
-        return true;
+
+        return inc || dec;
+    }
+
+
+    bool is_continuous(double epsilon = 1e-9) const {
+        if (segments_->get_length() == 0) {
+            return true;
+        }
+        if (segments_->get_length() == 1) {
+            return true;
+        }
+        interval full(segments_->get(0).start_x,
+                      segments_->get(segments_->get_length() - 1).end_x);
+        return is_continuous_on(full, epsilon);
     }
 
     bool is_monotonic() const {
-        if (segments_->get_length() <= 1) return true;
-        bool inc = true, dec = true;
-        for (int i = 0; i < segments_->get_length(); ++i) {
-            if (segments_->get(i).k < 0) inc = false;
-            if (segments_->get(i).k > 0) dec = false;
+        if (segments_->get_length() == 0) {
+            return true;
         }
-        if (!inc && !dec) return false;
-        for (int i = 0; i < segments_->get_length() - 1; ++i) {
-            segment curr = segments_->get(i);
-            segment next = segments_->get(i + 1);
-            if (inc && curr.evaluate(curr.end_x) > next.evaluate(next.start_x)) return false;
-            if (dec && curr.evaluate(curr.end_x) < next.evaluate(next.start_x)) return false;
+        if (segments_->get_length() == 1) {
+            return true;
         }
-        return true;
+        interval full(segments_->get(0).start_x,
+                      segments_->get(segments_->get_length() - 1).end_x);
+        return is_monotonic_on(full);
     }
 
-    virtual piecewise_function* redefine_on_interval(double start, double end, double k, double m) = 0;
-    virtual piecewise_function* add_segment(double start, double end, double k, double m) = 0;
-    virtual piecewise_function* remove_segment(int index) = 0;
-    virtual piecewise_function* concat(const piecewise_function& other) = 0;
+    virtual piecewise_function* redefine_on_interval(double start, double end, double k, double m) = 0; //переопр ф-ию
+    virtual piecewise_function* add_segment(double start, double end, double k, double m) = 0; //добавить
+    virtual piecewise_function* remove_segment(int index) = 0; //убрать
+    virtual piecewise_function* concat(const piecewise_function& other) = 0; //сцеп с др кусоч фу-ей (добавить все её сегменты в конец)
 
-    int get_segment_count() const { return segments_ ? segments_->get_length() : 0; }
-    segment get_segment(int index) const { return segments_->get(index); }
-    sequence<segment>* get_segments() const { return segments_; }
+    int get_segment_count() const {
+        return segments_ ? segments_->get_length() : 0;
+    } //кол-во сегментов ф-ии
+    segment get_segment(int index) const {
+        return segments_->get(index);
+    } //сегмент по индексу
+    sequence<segment>* get_segments() const {
+        return segments_;
+    } //указатель на колллекцию
 
-    virtual piecewise_function* clone() const = 0;
+    virtual piecewise_function* clone() const = 0; //клон
 };
 
 #endif

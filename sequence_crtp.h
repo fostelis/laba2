@@ -6,13 +6,25 @@
 template<class T, class Derived>
 class sequence_crtp : public sequence<T> {
 public:
-    Derived& self() { return static_cast<Derived&>(*this); }
-    const Derived& self() const { return static_cast<const Derived&>(*this); }
+    Derived& self() {
+        return static_cast<Derived&>(*this);
+    }
+    const Derived& self() const {
+        return static_cast<const Derived&>(*this);
+    }
 
-    sequence<T>* append(const T& item) override { return self().append_impl(item); }
-    sequence<T>* prepend(const T& item) override { return self().prepend_impl(item); }
-    sequence<T>* insert_at(const T& item, int index) override { return self().insert_at_impl(item, index); }
-    sequence<T>* concat(const sequence<T>& other) override { return self().concat_impl(other); }
+    sequence<T>* append(const T& item) override {
+        return self().append_impl(item);
+    }
+    sequence<T>* prepend(const T& item) override {
+        return self().prepend_impl(item);
+    }
+    sequence<T>* insert_at(const T& item, int index) override {
+        return self().insert_at_impl(item, index);
+    }
+    sequence<T>* concat(const sequence<T>& other) override {
+        return self().concat_impl(other);
+    }
 
 protected:
     virtual sequence<T>* append_impl(const T& item) = 0;

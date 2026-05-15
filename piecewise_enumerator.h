@@ -6,22 +6,24 @@
 
 class piecewise_enumerator {
 private:
-    sequence<segment>* segments_;
+    const sequence<segment>& segments_ref_;  //ссылка
     int index_;
 
 public:
-    piecewise_enumerator(sequence<segment>* segs) : segments_(segs), index_(-1) {}
+    //теперь ссылка
+    explicit piecewise_enumerator(const sequence<segment>& segs)
+        : segments_ref_(segs), index_(-1) {}
 
     bool move_next() {
         index_++;
-        return index_ < segments_->get_length();
+        return index_ < segments_ref_.get_length();
     }
 
     segment current() const {
-        if (index_ < 0 || index_ >= segments_->get_length()) {
+        if (index_ < 0 || index_ >= segments_ref_.get_length()) {
             throw index_out_of_range_exception("enumerator out of range");
         }
-        return segments_->get(index_);
+        return segments_ref_.get(index_);
     }
 
     void reset() {

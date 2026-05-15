@@ -1,9 +1,6 @@
 #ifndef SEGMENT_H
 #define SEGMENT_H
 
-#include <iostream>
-#include <cmath>
-
 struct segment {
     double start_x;
     double end_x;
@@ -16,11 +13,6 @@ struct segment {
 
     double evaluate(double x) const {
         return k * x + m;
-    }
-
-    friend std::ostream& operator<<(std::ostream& os, const segment& seg) {
-        os << "[" << seg.start_x << ", " << seg.end_x << "]: y = " << seg.k << "x + " << seg.m;
-        return os;
     }
 };
 

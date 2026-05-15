@@ -3,8 +3,8 @@
 
 #include "piecewise_function.h"
 #include "mutable_piecewise_function.h"
-#include <functional>
 
+//алгоритмы
 template<class Func>
 mutable_piecewise_function* map_segments(const piecewise_function* pf, Func func) {
     sequence<segment>* new_segs = new mutable_array_sequence<segment>();

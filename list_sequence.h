@@ -19,16 +19,26 @@ public:
     list_sequence(const T* items, int count) : items_(new linked_list<T>(items, count)) {}
     explicit list_sequence(const linked_list<T>& list) : items_(new linked_list<T>(list)) {}
     list_sequence(const list_sequence& other) : items_(new linked_list<T>(*other.items_)) {}
-    virtual ~list_sequence() { delete items_; }
+    virtual ~list_sequence() {
+        delete items_;
+    }
 
-    T get_first() const override { return items_->get_first(); }
-    T get_last() const override { return items_->get_last(); }
-    T get(int index) const override { return items_->get(index); }
+    T get_first() const override {
+        return items_->get_first();
+    }
+    T get_last() const override {
+        return items_->get_last();
+    }
+    T get(int index) const override {
+        return items_->get(index);
+    }
 
     //объявляем здесь, определяем ниже после mutable/immutable
     list_sequence<T>* get_subsequence(int start, int end) const override;
 
-    int get_length() const override { return items_->get_length(); }
+    int get_length() const override {
+        return items_->get_length();
+    }
 
     virtual list_sequence<T>* append_impl(const T& item) = 0;
     virtual list_sequence<T>* prepend_impl(const T& item) = 0;
@@ -36,8 +46,9 @@ public:
 
     list_sequence<T>* concat(const sequence<T>& other) override {
         list_sequence<T>* result = instance();
-        for (int i = 0; i < other.get_length(); ++i)
+        for (int i = 0; i < other.get_length(); ++i) {
             result = result->append_impl(other.get(i));
+        }
         return result;
     }
 
@@ -52,17 +63,34 @@ public:
     explicit mutable_list_sequence(const linked_list<T>& list) : list_sequence<T>(list) {}
     mutable_list_sequence(const list_sequence<T>& other) : list_sequence<T>(other) {}
 
-    list_sequence<T>* append(const T& item) override { return append_impl(item); }
-    list_sequence<T>* prepend(const T& item) override { return prepend_impl(item); }
-    list_sequence<T>* insert_at(const T& item, int index) override { return insert_at_impl(item, index); }
-    list_sequence<T>* clone() const override { return new mutable_list_sequence<T>(*this); }
+    list_sequence<T>* append(const T& item) override {
+        return append_impl(item);
+    }
+    list_sequence<T>* prepend(const T& item) override {
+        return prepend_impl(item);
+    }
+    list_sequence<T>* insert_at(const T& item, int index) override {
+        return insert_at_impl(item, index);
+    }
+    list_sequence<T>* clone() const override {
+        return new mutable_list_sequence<T>(*this);
+    }
 
 protected:
-    list_sequence<T>* instance() override { return this; }
-    list_sequence<T>* append_impl(const T& item) override { this->items_->append(item); return this; }
-    list_sequence<T>* prepend_impl(const T& item) override { this->items_->prepend(item); return this; }
+    list_sequence<T>* instance() override {
+        return this;
+    }
+    list_sequence<T>* append_impl(const T& item) override {
+        this->items_->append(item);
+        return this;
+    }
+    list_sequence<T>* prepend_impl(const T& item) override {
+        this->items_->prepend(item);
+        return this;
+    }
     list_sequence<T>* insert_at_impl(const T& item, int index) override {
-        this->items_->insert_at(item, index); return this;
+        this->items_->insert_at(item, index);
+        return this;
     }
 };
 
@@ -74,24 +102,37 @@ public:
     explicit immutable_list_sequence(const linked_list<T>& list) : list_sequence<T>(list) {}
     immutable_list_sequence(const list_sequence<T>& other) : list_sequence<T>(other) {}
 
-    list_sequence<T>* append(const T& item) override { return append_impl(item); }
-    list_sequence<T>* prepend(const T& item) override { return prepend_impl(item); }
-    list_sequence<T>* insert_at(const T& item, int index) override { return insert_at_impl(item, index); }
-    list_sequence<T>* clone() const override { return new immutable_list_sequence<T>(*this); }
+    list_sequence<T>* append(const T& item) override {
+        return append_impl(item);
+    }
+    list_sequence<T>* prepend(const T& item) override {
+        return prepend_impl(item);
+    }
+    list_sequence<T>* insert_at(const T& item, int index) override {
+        return insert_at_impl(item, index);
+    }
+    list_sequence<T>* clone() const override {
+        return new immutable_list_sequence<T>(*this);
+    }
 
 protected:
-    list_sequence<T>* instance() override { return new immutable_list_sequence<T>(*this); }
+    list_sequence<T>* instance() override {
+        return new immutable_list_sequence<T>(*this);
+    }
     list_sequence<T>* append_impl(const T& item) override {
         immutable_list_sequence<T>* copy = new immutable_list_sequence<T>(*this);
-        copy->items_->append(item); return copy;
+        copy->items_->append(item);
+        return copy;
     }
     list_sequence<T>* prepend_impl(const T& item) override {
         immutable_list_sequence<T>* copy = new immutable_list_sequence<T>(*this);
-        copy->items_->prepend(item); return copy;
+        copy->items_->prepend(item);
+        return copy;
     }
     list_sequence<T>* insert_at_impl(const T& item, int index) override {
         immutable_list_sequence<T>* copy = new immutable_list_sequence<T>(*this);
-        copy->items_->insert_at(item, index); return copy;
+        copy->items_->insert_at(item, index);
+        return copy;
     }
 };
 

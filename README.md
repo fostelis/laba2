@@ -22,15 +22,16 @@
 - `piecewise_enumerator.h` — Энумератор для обхода сегментов
 - `piecewise_operators.h` — Перегрузка операторов (`+`, `==`, `<<`, `!=`)
 - `piecewise_algorithms.h` — Map/Filter/Reduce над сегментами
-- `tests_piecewise.cpp` — Модульные тесты ЛР-3 (~105 кейсов)
+- `interval.h` - Понятие интервала
+- `tests_piecewise.cpp` — Модульные тесты ЛР-3 (~105 кейсов) 
 
 ### Общие / Инфраструктурные файлы
 - `exceptions.h` — Кастомные исключения (`index_out_of_range`, `empty_collection`)
 - `option.h` — Тип `Option<T>` для try-семантики
 - `sequence_crtp.h` — CRTP-база для статического полиморфизма
 - `io_utils.h` — Утилиты вывода в консоль (`operator<<` для последовательностей и функций)
+- `segment_io.h` - Вывод сегмента в поток
 - `main.cpp` — Консольный UI с меню выбора лабораторной и автозапуском тестов
-
 ---
 
 ## Выполненное: Лабораторная работа №2

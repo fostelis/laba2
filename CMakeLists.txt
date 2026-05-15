@@ -28,4 +28,6 @@ add_executable(laba2 main.cpp
         piecewise_algorithms.h
         tests_piecewise.cpp
         io_utils.h
+        segment_io.h
+        interval.h
 )
